@@ -9,7 +9,7 @@ setup(name="autohockey",
       license="MIT",
       author="Nephila",
       author_email="stagi.andrea@gmail.com",
-      url="https://github.com/atooma/autoflight",
+      url="https://github.com/nephila/autohockey",
       keywords= "hockeyapp ci app ios android test apk ipa script",
       install_requires=[
         "requests",
