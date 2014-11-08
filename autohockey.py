@@ -10,7 +10,7 @@
 
 import requests, json, sys, os.path
 from requests.exceptions import ConnectionError
-from optparse import OptionParser
+import argparse
 
 UPLOAD_URL = 'https://rink.hockeyapp.net/api/2/apps/upload'
 
@@ -40,34 +40,30 @@ def upload(build_file, api_token='', dsym='', notify=2, notes=''):
     except ConnectionError:
         raise AutoHockeyConnectionError('Connection error. Please try again.')
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='A simple script to upload a given app to Hockeyapp.')
+    parser.add_argument('build', help='Path of the build you want to upload.')
+    parser.add_argument('--api-token', dest='api_token', default='', help='The API token.' )
+    parser.add_argument('--dsym', dest='dsym', default='', help='iOS OSX ONLY, .dsym.zip corresponding to the build.')
+    parser.add_argument('--notes', dest='notes', default='No notes', help='Your notes for this build.')
+    parser.add_argument('--notify', dest='notify', default=1, help='' )
+    parser.add_argument('--config-file', dest='config_file', default='autohockey.cfg', help='Configuration file')
+    args = parser.parse_args()
+    return args
 
 def main():
-    usage = 'Usage: %prog [options] my_apk_or_ipa_or_app.zip_path'
-    parser = OptionParser(usage=usage)
-    parser.add_option( '-a', '--api-token', dest='api_token', default='', help='The API token.' )
-    parser.add_option( '-s', '--dsym', dest='dsym', default='', help='iOS OSX ONLY, .dsym.zip corresponding to the build.')
-    parser.add_option( '-d', '--notes', dest='notes', default='No notes', help='Your notes for this build.' )
-    parser.add_option( '-n', '--notify', dest='notify', default=1, help='' )
-    parser.add_option( '-c', '--config-file', dest='config_file', default='autohockey.cfg', help='Configuration file' )
-
-    (options, args) = parser.parse_args()
-
-    if len(args) == 0:
-        parser.print_usage()
-        exit(0)
-    if len(args) == 1:
-        build_file = args[0]
-
+    args = parse_args()
+    build_file = args.build
     params = {}
-    params['api_token'] = options.api_token
-    params['notify'] = options.notify
-    params['notes'] = options.notes
-    if options.config_file:
+    params['api_token'] = args.api_token
+    params['notify'] = args.notify
+    params['notes'] = args.notes
+    if args.config_file:
         print('Reading configuration...')
-        if os.path.exists(options.config_file):
-            json_file_content = open(options.config_file, 'r').read()
+        if os.path.exists(args.config_file):
+            json_file_content = open(args.config_file, 'r').read()
         else:
-            print('Error! {} file doesn\'t exist'.format(options.config_file))
+            print('Error! {} file doesn\'t exist'.format(args.config_file))
             exit(0)
         params = dict(list(params.items()) + list(json.loads(json_file_content).items()))
 
